@@ -1,0 +1,55 @@
+---
+apiVersion: v1
+kind: Namespace #
+metadata:
+  name: olauwu
+  labels:
+    istio-injection:
+      enabled
+---
+apiVersion: apps/v1
+kind: Deployment #Aquí colocamos los PODS de mi aplicación, se encarga de mantener la salud minima para tener viva mi app
+metadata:
+  name: olauwu-pod
+  namespace: olauwu
+  labels: 
+    app: ola
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ola
+  template:
+    metadata:
+      labels:
+        app: ola
+        version: v1
+    spec:
+      containers:
+        - name: web
+          image: wonezwan1/olauwu:v1
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: ola-svc
+  namespace: olauwu
+spec:
+  selector:
+    app: ola
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 80
